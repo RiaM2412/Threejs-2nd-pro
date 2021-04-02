@@ -20,15 +20,18 @@ const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 
 // Objects
-const geometry= new THREE.PlaneBufferGeometry(3,3,64,64)
+const geometry= new THREE.PlaneBufferGeometry(5,5,64,64)
 
 // Materials
 
 const material= new THREE.MeshStandardMaterial({
-    color:'grey',
+    color:'#3c00ff',
     map: texture,
     displacementMap: Height,
-    displacementScale: .5
+    displacementScale: .6,
+    alphaMap: alpha,
+    transparent: true,
+    depthTest: false
 })
 const plane= new THREE.Mesh(geometry,material)
 scene.add(plane)
@@ -47,11 +50,39 @@ pointLight.position.z = 4
 scene.add(pointLight)
 
 
+
 gui.add(pointLight.position, 'x')
 gui.add(pointLight.position, 'y')
 gui.add(pointLight.position, 'z')
 
-const col = {color: '#00ff00'}
+//Light2
+const pointLight2 = new THREE.PointLight(0xff0000, 0.1)
+pointLight2.position.set(-1.86,1,-1.65)
+pointLight2.intensity=10
+
+
+scene.add(pointLight2)
+
+const Light1= gui.addFolder('Light 1')
+
+Light1.add(pointLight2.position,'y').min(-3).max(3).step(0.01)
+Light1.add(pointLight2.position,'x').min(-6).max(6).step(0.01)
+Light1.add(pointLight2.position,'z').min(-3).max(3).step(0.01)
+Light1.add(pointLight2,'intensity').min(0).max(10).step(0.01)
+
+
+//pointlight1 color
+const light1Color ={
+    color: 0xff0000
+}
+
+Light1.addColor(light1Color, 'color')
+   .onChange(() =>{
+       pointLight2.color.set(light1Color.color)
+   })
+
+
+const col = {color: '#3c00ff'}
 gui.addColor(col,'color').onChange(() =>{
     pointLight.color.set(col.color)
 })
@@ -60,14 +91,14 @@ gui.addColor(col,'color').onChange(() =>{
  * Sizes
  */
 const sizes = {
-    width: window.innerWidth,
+    width: window.innerWidth ,
     height: window.innerHeight
 }
 
 window.addEventListener('resize', () =>
 {
     // Update sizes
-    sizes.width = window.innerWidth
+    sizes.width = window.innerWidth 
     sizes.height = window.innerHeight
 
     // Update camera
@@ -97,7 +128,8 @@ scene.add(camera)
  * Renderer
  */
 const renderer = new THREE.WebGLRenderer({
-    canvas: canvas
+    canvas: canvas,
+    alpha: true
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -105,6 +137,13 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 /**
  * Animate
  */
+document.addEventListener('mousemove',animateTerrain)
+
+let mouseY=0
+function animateTerrain(event){
+    mouseY=event.clientY
+    console.log(mouseY)
+}
 
 const clock = new THREE.Clock()
 
@@ -115,8 +154,8 @@ const tick = () =>
 
     // Update objects
     // sphere.rotation.y = .5 * elapsedTime
-    plane.rotation.z = .5*elapsedTime
-
+    plane.rotation.z = .2*elapsedTime
+    plane.material.displacementScale = 0.3+ mouseY*0.0005
     // Update Orbital Controls
     // controls.update()
 
