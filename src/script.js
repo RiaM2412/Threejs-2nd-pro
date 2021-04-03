@@ -2,11 +2,12 @@ import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
-import { Loader, Material } from 'three'
+import { Loader, Material, SphereBufferGeometry } from 'three'
 
 // Texture loader
 const loader= new THREE.TextureLoader()
 const texture= new loader.load('/texture.jpg')
+const texture1= new loader.load('/droplet.png')
 const Height= new loader.load('/Height.png')
 const alpha= new loader.load('/alpha.png')
 
@@ -20,12 +21,13 @@ const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 
 // Objects
-const geometry= new THREE.PlaneBufferGeometry(5,5,64,64)
+const geometry= new THREE.PlaneBufferGeometry(3,3,64,64)
+const geometry2 = new THREE.SphereBufferGeometry(.5,64,64)
 
 // Materials
 
 const material= new THREE.MeshStandardMaterial({
-    color:'#3c00ff',
+    color:'gray',
     map: texture,
     displacementMap: Height,
     displacementScale: .6,
@@ -33,8 +35,23 @@ const material= new THREE.MeshStandardMaterial({
     transparent: true,
     depthTest: false
 })
+
+const material2= new THREE.MeshStandardMaterial({
+    color:'white',
+    map: texture1,
+    
+    transparent: true,
+    depthTest: false
+})
+material2.roughness=2
 const plane= new THREE.Mesh(geometry,material)
 scene.add(plane)
+const sphere= new THREE.Mesh(geometry2,material2)
+scene.add(sphere)
+
+
+sphere.position.y=1
+
 
 plane.rotation.x=181
 gui.add(plane.rotation, 'x').min(0).max(360)
@@ -91,14 +108,14 @@ gui.addColor(col,'color').onChange(() =>{
  * Sizes
  */
 const sizes = {
-    width: window.innerWidth ,
+    width: window.innerWidth *.7 ,
     height: window.innerHeight
 }
 
 window.addEventListener('resize', () =>
 {
     // Update sizes
-    sizes.width = window.innerWidth 
+    sizes.width = window.innerWidth*.7 
     sizes.height = window.innerHeight
 
     // Update camera
@@ -115,7 +132,7 @@ window.addEventListener('resize', () =>
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.x = 0
+camera.position.x =0
 camera.position.y = 0
 camera.position.z = 3
 scene.add(camera)
@@ -142,7 +159,7 @@ document.addEventListener('mousemove',animateTerrain)
 let mouseY=0
 function animateTerrain(event){
     mouseY=event.clientY
-    console.log(mouseY)
+    // console.log(mouseY)
 }
 
 const clock = new THREE.Clock()
@@ -154,8 +171,9 @@ const tick = () =>
 
     // Update objects
     // sphere.rotation.y = .5 * elapsedTime
-    plane.rotation.z = .2*elapsedTime
+    plane.rotation.z = .05*elapsedTime
     plane.material.displacementScale = 0.3+ mouseY*0.0005
+    sphere.rotation.x = elapsedTime*1.5
     // Update Orbital Controls
     // controls.update()
 
